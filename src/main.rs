@@ -27,6 +27,8 @@ struct ConvertArgs {
 fn main() {
     let args = ConvertArgs::parse();
     let mut image = image::open(std::path::Path::new(&args.path)).unwrap();
+
+    // Determine from arguments if we need to resize the image and set parameters accordingly
     let resize;
     let (width, height) = match (args.width, args.height) {
         (Some(w), Some(h)) => {
@@ -46,19 +48,21 @@ fn main() {
             (image.width(), image.height())
         }
     };
-
     if resize {
         image = image.resize(width, height, FilterType::Nearest);
     }
+
+    // Convert the image
     let pixels: Vec<_> = image
-        .to_luma8()
+        .to_luma8() // convert the image to 8bit grayscale
         .pixels()
-        .map(|p| BRIGHTNESS_ORDER[p.0[0] as usize * BRIGHTNESS_ORDER.len() / 256])
+        .map(|p| BRIGHTNESS_ORDER[p.0[0] as usize * BRIGHTNESS_ORDER.len() / 256]) // map the brightness values proportionally to the length of the char array
         .collect();
+
+    // Print the finished grid
     let grid = Grid::from_vec(pixels, width as usize);
-    let rows = (0..grid.rows()).into_iter();
-    let cols = (0..grid.cols()).into_iter();
-    for (i, j) in rows.cartesian_product(cols) {
+    for (i, j) in (0..grid.rows()).cartesian_product(0..grid.cols()) {
+        // Print 3 characters per pixel to account for the width being only about 1/3 the height
         print!("{}{}{}", grid[i][j], grid[i][j], grid[i][j]);
         if j == grid.cols() - 1 {
             println!();
