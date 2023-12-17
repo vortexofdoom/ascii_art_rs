@@ -49,7 +49,7 @@ fn main() {
         }
     };
     if resize {
-        image = image.resize(width, height, FilterType::Nearest);
+        image = image.resize(width, height, FilterType::Triangle);
     }
 
     // Convert the image
@@ -62,8 +62,9 @@ fn main() {
     // Print the finished grid
     let grid = Grid::from_vec(pixels, width as usize);
     for (i, j) in (0..grid.rows()).cartesian_product(0..grid.cols()) {
+        let c = grid[i][j];
         // Print 3 characters per pixel to account for the width being only about 1/3 the height
-        print!("{}{}{}", grid[i][j], grid[i][j], grid[i][j]);
+        print!("{c}{c}{c}");
         if j == grid.cols() - 1 {
             println!();
         }
